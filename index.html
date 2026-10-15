@@ -327,6 +327,13 @@ Natural Intelligence Toulouse Institute (ANITI), France</li>
           handstand.</p>
           <p>A preprint is also available on <a
           href="https://arxiv.org/abs/2609.08853">arXiv</a>.</p>
+          <figure>
+          <img src="static/images/sim2real.png"
+          alt="CAST sim-to-real transfer on the Unitree Go2 quadruped performing a dynamic handstand" />
+          <figcaption aria-hidden="true">CAST sim-to-real transfer on
+          the Unitree Go2 quadruped performing a dynamic
+          handstand</figcaption>
+          </figure>
           <h2 id="key-contributions">Key Contributions</h2>
           <ol type="1">
           <li><strong>Hybrid Bellman target with a characterized fixed
@@ -391,6 +398,12 @@ Natural Intelligence Toulouse Institute (ANITI), France</li>
           <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo>,</mo><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Q(z,\pi_\theta(z))</annotation></semantics></math>
           step.</li>
           </ul>
+          <figure>
+          <img src="static/images/diagram_2.png"
+          alt="Overview diagram of CAST architecture and training" />
+          <figcaption aria-hidden="true">Overview diagram of CAST
+          architecture and training</figcaption>
+          </figure>
           <p>The behavior policy
           <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
           (the planner) generally outperforms the learned policy
@@ -442,6 +455,12 @@ Natural Intelligence Toulouse Institute (ANITI), France</li>
           <li><strong>1</strong> real-world Go2 handstand
           deployment</li>
           </ul>
+          <figure>
+          <img src="static/images/learning_curves.png"
+          alt="Episode return vs environment steps for CAST vs baselines on 14 tasks" />
+          <figcaption aria-hidden="true">Episode return vs environment
+          steps for CAST vs baselines on 14 tasks</figcaption>
+          </figure>
           <p><strong>Sample efficiency.</strong> Episode return
           vs. environment steps for CAST against BOOM and BMPC (with
           SAC, DreamerV3, and TD-MPC2 also shown) on 7 DMControl and 7
@@ -450,14 +469,26 @@ Natural Intelligence Toulouse Institute (ANITI), France</li>
           attains high returns earlier during training, most notably on
           <code>H1hand-run</code>, <code>H1hand-pole</code>, and
           <code>Dog-run</code>.</p>
+          <figure>
+          <img src="static/images/auc_profile.png"
+          alt="Performance profile of AUC-to-2M scores, pooled and per suite" />
+          <figcaption aria-hidden="true">Performance profile of
+          AUC-to-2M scores, pooled and per suite</figcaption>
+          </figure>
           <p><strong>Performance profile of AUC-to-2M scores</strong>,
           normalized per task by the best AUC any method reaches on that
           task: pooled across all 14 tasks, and per suite (DMControl,
           HumanoidBench). CAST achieves the best AUC performance profile
           among all baselines, confirming that its improved learning
           dynamics translate into faster policy learning.</p>
-          <p>Example task rollouts were recorded on DMControl
-          (Humanoid-run, Dog-run) and HumanoidBench (H1hand).</p>
+          <p>Example task rollouts, shown here as representative first
+          frames (videos not hosted):</p>
+          <p><img src="static/images/humanoid_loop_frame.jpg"
+          alt="DMControl — Humanoid-run, first frame" /> <img
+          src="static/images/dog_run_loop_frame.jpg"
+          alt="DMControl — Dog-run, first frame" /> <img
+          src="static/images/hbench_loop_frame.jpg"
+          alt="HumanoidBench — H1hand, first frame" /></p>
           <h2 id="ablations">Ablations</h2>
           <p>We isolate the contribution of the hybrid value target and
           the expanded policy-gradient horizon on Dog-run and
@@ -483,6 +514,12 @@ Natural Intelligence Toulouse Institute (ANITI), France</li>
           (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>2</mn><mo>,</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}2,3</annotation></semantics></math>),
           with smaller confidence intervals on both tasks.</li>
           </ol>
+          <figure>
+          <img src="static/images/ablation_vtarget_new.png"
+          alt="Value target ablation on Dog-run and Humanoid-run" />
+          <figcaption aria-hidden="true">Value target ablation on
+          Dog-run and Humanoid-run</figcaption>
+          </figure>
           <p><strong>Value-target ablation.</strong> Our hybrid target
           vs. purely on-policy and purely off-policy alternatives
           (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}1</annotation></semantics></math>
@@ -492,6 +529,12 @@ Natural Intelligence Toulouse Institute (ANITI), France</li>
           is consistently the worst of the three — it yields abrupt
           policy updates that destabilize learning, confirming the need
           for the alternating construction.</p>
+          <figure>
+          <img src="static/images/ablation_hv_new.png"
+          alt="Behavior-to-policy ratio ablation on Dog-run and Humanoid-run" />
+          <figcaption aria-hidden="true">Behavior-to-policy ratio
+          ablation on Dog-run and Humanoid-run</figcaption>
+          </figure>
           <p><strong>Behavior-to-policy ratio ablation.</strong>
           <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>V</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_V{=}1</annotation></semantics></math>
           (CAST)
@@ -508,6 +551,12 @@ Natural Intelligence Toulouse Institute (ANITI), France</li>
           <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>V</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_V{=}1</annotation></semantics></math>;
           on Humanoid-run both lag behind, indicating that anchoring to
           a single real transition is a well-balanced choice.</p>
+          <figure>
+          <img src="static/images/ablation_pihorizon_new.png"
+          alt="Expanded gradient horizon ablation on Dog-run and Humanoid-run" />
+          <figcaption aria-hidden="true">Expanded gradient horizon
+          ablation on Dog-run and Humanoid-run</figcaption>
+          </figure>
           <p><strong>Expanded-gradient-horizon ablation.</strong>
           <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}1</annotation></semantics></math>
           (ours)
@@ -526,7 +575,14 @@ Natural Intelligence Toulouse Institute (ANITI), France</li>
           <p>CAST policies rolled out in the MuJoCo physics simulator,
           on both a quadruped (Unitree Go2, dynamic handstand) and a
           humanoid (Unitree R1, locomotion), including robustness to
-          external pushes applied during the handstand.</p>
+          external pushes applied during the handstand. Shown here as
+          representative first frames (videos not hosted):</p>
+          <p><img src="static/images/r1_sim_frame.jpg"
+          alt="R1 humanoid — locomotion (simulation), first frame" />
+          <img src="static/images/go2_sim_frame.jpg"
+          alt="Go2 — dynamic handstand (simulation), first frame" />
+          <img src="static/images/go2_sim_disturbance_frame.jpg"
+          alt="Go2 — handstand under external disturbances (simulation), first frame" /></p>
           <h2 id="real-world-deployment">Real-World Deployment</h2>
           <p>To demonstrate practical applicability, we deploy a policy
           trained entirely in simulation on a Unitree Go2 quadruped,
@@ -536,6 +592,17 @@ Natural Intelligence Toulouse Institute (ANITI), France</li>
           online planning. The policy transfers from simulation to
           hardware and executes stable handstand motions in real time,
           without any online planning at deployment.</p>
+          <p><img src="static/images/go2_real_1_frame.jpg"
+          alt="Hardware deployment — run 1, first frame" /> <img
+          src="static/images/go2_real_2_frame.jpg"
+          alt="Hardware deployment — run 2, first frame" /></p>
+          <figure>
+          <img src="static/images/hw_snapshots.png"
+          alt="Snapshots of the learned CAST policy executing a dynamic handstand on the Unitree Go2" />
+          <figcaption aria-hidden="true">Snapshots of the learned CAST
+          policy executing a dynamic handstand on the Unitree
+          Go2</figcaption>
+          </figure>
         </div>
       </div>
 
