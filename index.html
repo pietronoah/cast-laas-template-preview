@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+          <meta name="author" content="Pietro Noah Crestaz 1,2" />
+          <meta name="author" content="Mohamed Yassine Kabouri 2,3" />
+          <meta name="author" content="Nicolas Mansard 2,4" />
+          <meta name="author" content="Andrea Del Prete 1" />
+                    <title>CAST: Alternating State-Value Targets and Expanded Policy Gradients for Model-Based RL</title>
+    <style>
+      .peertube { margin-bottom: 2em; }
+      html {
+        line-height: 1.5;
+        font-family: Georgia, serif;
+        color: #1a1a1a;
+        background-color: #fdfdfd;
+      }
+      body {
+        margin: 0 auto;
+        padding-left: 50px;
+        padding-right: 50px;
+        padding-top: 50px;
+        padding-bottom: 50px;
+        hyphens: auto;
+        overflow-wrap: break-word;
+        text-rendering: optimizeLegibility;
+        font-kerning: normal;
+      }
+      @media (max-width: 600px) {
+        body {
+          font-size: 0.9em;
+          padding: 1em;
+        }
+      }
+      @media print {
+        body {
+          background-color: transparent;
+          color: black;
+          font-size: 12pt;
+        }
+        p, h2, h3 {
+          orphans: 3;
+          widows: 3;
+        }
+        h2, h3, h4 {
+          page-break-after: avoid;
+        }
+      }
+      p {
+        margin: 1em 0;
+      }
+      a {
+        color: #1a1a1a;
+      }
+      a:visited {
+        color: #1a1a1a;
+      }
+      img {
+        max-width: 100%;
+      }
+      h1, h2, h3, h4, h5, h6 {
+        margin-top: 1.4em;
+      }
+      h5, h6 {
+        font-size: 1em;
+        font-style: italic;
+      }
+      h6 {
+        font-weight: normal;
+      }
+      ol, ul {
+        padding-left: 1.7em;
+        margin-top: 1em;
+      }
+      li > ol, li > ul {
+        margin-top: 0;
+      }
+      blockquote {
+        margin: 1em 0 1em 1.7em;
+        padding-left: 1em;
+        border-left: 2px solid #e6e6e6;
+        color: #606060;
+      }
+      code {
+        font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+        font-size: 85%;
+        margin: 0;
+      }
+      pre {
+        margin: 1em 0;
+        overflow: auto;
+      }
+      pre code {
+        padding: 0;
+        overflow: visible;
+        overflow-wrap: normal;
+      }
+      .sourceCode {
+       background-color: transparent;
+       overflow: visible;
+      }
+      hr {
+        background-color: #1a1a1a;
+        border: none;
+        height: 1px;
+        margin: 1em 0;
+      }
+      table {
+        margin: 1em 0;
+        border-collapse: collapse;
+        width: 100%;
+        overflow-x: auto;
+        display: block;
+        font-variant-numeric: lining-nums tabular-nums;
+      }
+      table caption {
+        margin-bottom: 0.75em;
+      }
+      tbody {
+        margin-top: 0.5em;
+        border-top: 1px solid #1a1a1a;
+        border-bottom: 1px solid #1a1a1a;
+      }
+      th {
+        border-top: 1px solid #1a1a1a;
+        padding: 0.25em 0.5em 0.25em 0.5em;
+      }
+      td {
+        padding: 0.125em 0.5em 0.25em 0.5em;
+      }
+      header {
+        margin-bottom: 4em;
+      }
+      #TOC li {
+        list-style: none;
+      }
+      #TOC a:not(:hover) {
+        text-decoration: none;
+      }
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+      div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+      ul.task-list{list-style: none;}
+      html { -webkit-text-size-adjust: 100%; }
+      pre > code.sourceCode { white-space: pre; position: relative; }
+      pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+      pre > code.sourceCode > span:empty { height: 1.2em; }
+      .sourceCode { overflow: visible; }
+      code.sourceCode > span { color: inherit; text-decoration: inherit; }
+      div.sourceCode { margin: 1em 0; }
+      pre.sourceCode { margin: 0; }
+      @media screen {
+      div.sourceCode { overflow: auto; }
+      }
+      @media print {
+      pre > code.sourceCode { white-space: pre-wrap; }
+      pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+      }
+      pre.numberSource code
+        { counter-reset: source-line 0; }
+      pre.numberSource code > span
+        { position: relative; left: -4em; counter-increment: source-line; }
+      pre.numberSource code > span > a:first-child::before
+        { content: counter(source-line);
+          position: relative; left: -1em; text-align: right; vertical-align: baseline;
+          border: none; display: inline-block;
+          -webkit-touch-callout: none; -webkit-user-select: none;
+          -khtml-user-select: none; -moz-user-select: none;
+          -ms-user-select: none; user-select: none;
+          padding: 0 4px; width: 4em;
+          color: #aaaaaa;
+        }
+      pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+      div.sourceCode
+        {   }
+      @media screen {
+      pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+      }
+      code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+      code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+      code span.at { color: #7d9029; } /* Attribute */
+      code span.bn { color: #40a070; } /* BaseN */
+      code span.bu { color: #008000; } /* BuiltIn */
+      code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+      code span.ch { color: #4070a0; } /* Char */
+      code span.cn { color: #880000; } /* Constant */
+      code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+      code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+      code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+      code span.dt { color: #902000; } /* DataType */
+      code span.dv { color: #40a070; } /* DecVal */
+      code span.er { color: #ff0000; font-weight: bold; } /* Error */
+      code span.ex { } /* Extension */
+      code span.fl { color: #40a070; } /* Float */
+      code span.fu { color: #06287e; } /* Function */
+      code span.im { color: #008000; font-weight: bold; } /* Import */
+      code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+      code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+      code span.op { color: #666666; } /* Operator */
+      code span.ot { color: #007020; } /* Other */
+      code span.pp { color: #bc7a00; } /* Preprocessor */
+      code span.sc { color: #4070a0; } /* SpecialChar */
+      code span.ss { color: #bb6688; } /* SpecialString */
+      code span.st { color: #4070a0; } /* String */
+      code span.va { color: #19177c; } /* Variable */
+      code span.vs { color: #4070a0; } /* VerbatimString */
+      code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    </style>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+  </head>
+  <body>
+    <div class="container">
+      
+      <header id="title-block-header">
+                  <h1 class="title text-center">CAST: Alternating
+State-Value Targets and Expanded Policy Gradients for Model-Based
+RL</h1>
+                      <h4 class="subtitle text-center text-muted">Preprint,
+2026</h4>
+                  
+                  <ul class="list-inline text-center">
+                      <li class="author list-inline-item">Pietro Noah
+Crestaz <sup>1,2</sup></li>
+                      <li class="author list-inline-item">Mohamed
+Yassine Kabouri <sup>2,3</sup></li>
+                      <li class="author list-inline-item"><a href="https://gepettoweb.laas.fr/index.php/Members/NicolasMansard">Nicolas
+Mansard</a> <sup>2,4</sup></li>
+                      <li class="author list-inline-item">Andrea Del
+Prete <sup>1</sup></li>
+                    </ul>
+        
+        <div class="row align-items-center">
+
+          <div class="col">
+                          <a role="button" class="btn btn-outline-primary" href="https://github.com/pietronoah/CAST_MBRL">Code <i class="bi-github"></i></a>
+                                      <a role="button" target="_blank" class="btn btn-outline-primary" href="https://hal.science/hal-05739032v1">HAL <i class="bi-share"></i></a>
+              <a role="button" target="_blank" class="btn btn-outline-primary" href="https://hal.science/hal-05739032v1/document">Paper <i class="bi-file-pdf"></i></a>
+              <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Cite <i class="bi-book"></i>
+              </button>
+
+              <!-- Modal -->
+              <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">Bibtex</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body bg-light">
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="va">@unpublished</span>{<span class="ot">crestaz:hal</span>-<span class="ot">05739032</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">TITLE</span> = {{CAST: Alternating State-Value Targets and Expanded Policy Gradients for Model-Based Reinforcement Learning}},</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">AUTHOR</span> = {Crestaz, Pietro Noah and Kabouri, Mohamed Yassine and Mansard, Nicolas and Prete, Andrea Del},</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">URL</span> = {https://hal.science/hal-05739032},</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">NOTE</span> = {working paper or preprint},</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">HAL_LOCAL_REFERENCE</span> = {Rapport LAAS n{<span class="ch">\textdegree</span>} 26292},</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">YEAR</span> = {2026},</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">MONTH</span> = <span class="st">Sep</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">KEYWORDS</span> = {Reinfocement learning ; Optimization and optimal control ; Legged robots},</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">PDF</span> = {https://hal.science/hal-05739032v1/file/CAST.pdf},</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">HAL_ID</span> = {hal-05739032},</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">HAL_VERSION</span> = {v1},</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span></code></pre></div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                                  </div>
+
+                      <ul class="col text-end list-unstyled">
+                          <li class="org"><sup>1</sup> University of
+Trento, Italy</li>
+                          <li class="org"><sup>2</sup> LAAS-CNRS,
+Université de Toulouse, France</li>
+                          <li class="org"><sup>3</sup> New York
+University, USA</li>
+                          <li class="org"><sup>4</sup> Artificial and
+Natural Intelligence Toulouse Institute (ANITI), France</li>
+                        </ul>
+                  </div>
+
+      </header>
+
+      
+                      <div class="text-center peertube">
+          <iframe width="560" height="315" sandbox="allow-same-origin allow-scripts allow-popups" src="https://peertube.laas.fr/videos/embed/5YNB72gs2DLgRtL4De37z6"
+            frameborder="0" allowfullscreen ></iframe>
+        </div>
+              
+      <div class="row">
+        <div class="mx-auto col-md-12 col-lg-9 col-xl-8 col-xxl-7 justify-content-center">
+          <!--
+            COMPARISON FILE — NOT PART OF THE WEBSITE BUILD.
+            This recreates the CAST page content using the LAAS/Gepetto "plain article"
+            template from https://gitlab.laas.fr/gepetto/articles (canonical example:
+            cosyslam.md, built via template.html + bibtex.py + pandoc).
+
+            How that pipeline differs from the current custom index.html:
+            - Header only supports Paper/HAL/Cite (auto-fetched bibtex via HAL API)/Data/Code
+              buttons — no arXiv button, so the arXiv link is given inline below instead.
+            - Only ONE video slot (the `peertube` front-matter field), embedded automatically
+              above the body. It requires an "/videos/embed/..." URL, not the "/w/..." short
+              link used on the live site, so it's rewritten below.
+            - No figure/video-grid, stat-row, or ablation-card layouts exist in this template
+              — figures become plain Markdown images and extra videos become raw <video>/
+              <iframe> tags inline in the body, as other gepetto articles do (e.g.
+              wojciechowski_icra2026.md embeds extra iframes by hand).
+            - The lab's `pandoc` build command has no --mathjax flag, so the $...$ LaTeX
+              below would NOT render as math like it does on the live site (MathJax is
+              loaded explicitly in index.html's <head>, which this template doesn't do).
+            - Paths below are left as "static/..." to match the current repo; the lab
+              Makefile actually outputs to public/*.html, so real paths would need "../".
+          -->
+          <h2 id="abstract">Abstract</h2>
+          <p>Model-based reinforcement learning (MBRL) is a family of RL
+          methods that learn a model of the environment and use it for
+          action selection, making it well suited to robotics due to its
+          sample efficiency. Combining learned models with online
+          planning can further improve action selection, as the planner
+          can exploit the model to find better actions than the learned
+          policy alone. Recent methods combining learned policies with
+          online planning typically learn the value of the policy rather
+          than the stronger planner-guided behavior. We present
+          <strong>CAST</strong> (<strong>C</strong>ritic with
+          <strong>A</strong>lternating <strong>S</strong>tate-value
+          <strong>T</strong>arget), which uses planner-guided behavior
+          to improve value learning while regularizing the value
+          estimate with the current policy. CAST replaces the
+          action-value critic with a state-value critic, trained using a
+          target that combines a real planner-guided transition and an
+          imagined transition under the current policy. The resulting
+          value function corresponds to an alternating process between
+          planner-guided behavior and the current policy, allowing it to
+          benefit from the stronger planner behavior while being
+          regularized by the policy being learned. We evaluate CAST on
+          the DeepMind Control and HumanoidBench Suites against several
+          state-of-the-art methods, and demonstrate successful transfer
+          to a physical Unitree Go2 quadruped performing a dynamic
+          handstand.</p>
+          <p>A preprint is also available on <a
+          href="https://arxiv.org/abs/2609.08853">arXiv</a>.</p>
+          <figure>
+          <img src="static/images/sim2real.png"
+          alt="CAST sim-to-real transfer on the Unitree Go2 quadruped performing a dynamic handstand" />
+          <figcaption aria-hidden="true">CAST sim-to-real transfer on
+          the Unitree Go2 quadruped performing a dynamic
+          handstand</figcaption>
+          </figure>
+          <p><strong>Sim-to-real transfer.</strong> A policy trained
+          entirely in simulation with CAST transfers directly to a
+          physical Unitree Go2 quadruped, executing a dynamic handstand.
+          MuJoCo simulation (left) and real-robot execution (right).</p>
+          <h2 id="key-contributions">Key Contributions</h2>
+          <ol type="1">
+          <li><strong>Hybrid Bellman target with a characterized fixed
+          point.</strong> A regularized value target combining a real
+          transition under the behavior policy
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+          with an imagined transition under
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>.
+          We prove this composed operator is a
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>γ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\gamma^2</annotation></semantics></math>-contraction
+          with a unique fixed point
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>V</mi><mtext mathvariant="normal">CAST</mtext></msub><annotation encoding="application/x-tex">V_\text{CAST}</annotation></semantics></math>,
+          corresponding to an alternating
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>→</mo><msub><mi>π</mi><mi>θ</mi></msub></mrow><annotation encoding="application/x-tex">\beta \rightarrow \pi_\theta</annotation></semantics></math>
+          process.</li>
+          <li><strong>Expanded
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>-step
+          policy gradient.</strong> Since a state-value critic has no
+          action input to differentiate through, we reconstruct an
+          action-value estimate from the learned reward and dynamics
+          models, and propagate policy gradients through
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+          imagined steps before bootstrapping with
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>V</mi><mi>ψ</mi></msub><annotation encoding="application/x-tex">V_\psi</annotation></semantics></math>.</li>
+          </ol>
+          <h2 id="method">Method</h2>
+          <p>CAST builds on TD-MPC2, retaining its latent world model
+          and MPPI planner, while replacing the action-value critic
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo>,</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Q(z,a)</annotation></semantics></math>
+          with an ensemble state-value critic
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">V(z)</annotation></semantics></math>
+          trained toward the value of the planner-augmented behavior
+          policy
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>.</p>
+          <ul>
+          <li><strong>Action-value → state-value critic.</strong>
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo>,</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Q(z,a)</annotation></semantics></math>
+          is replaced by an ensemble
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">V(z)</annotation></semantics></math>.
+          The planner uses
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>V</mi><mo accent="true">‾</mo></mover><mi>ψ</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>z</mi><mrow><mi>t</mi><mo>+</mo><mi>H</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\bar V_\psi(z_{t+H})</annotation></semantics></math>
+          directly as the terminal value, removing the need to sample a
+          terminal policy action during MPPI.</li>
+          <li><strong>Behavior-value target.</strong> The critic is
+          trained toward the alternating composition of
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+          and
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>
+          instead of the value of
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>
+          alone, drawing on the stronger planner-augmented behavior
+          policy.</li>
+          <li><strong>Expanded policy gradient.</strong> Since
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">V(z)</annotation></semantics></math>
+          has no action input to differentiate, gradients are propagated
+          through
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+          imagined transitions of the learned dynamics before
+          bootstrapping with
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>V</mi><mo accent="true">‾</mo></mover><mi>ψ</mi></msub><annotation encoding="application/x-tex">\bar V_\psi</annotation></semantics></math>,
+          instead of a single
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo>,</mo><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>z</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">Q(z,\pi_\theta(z))</annotation></semantics></math>
+          step.</li>
+          </ul>
+          <figure>
+          <img src="static/images/diagram_2.png"
+          alt="Overview diagram of CAST architecture and training" />
+          <figcaption aria-hidden="true">Overview diagram of CAST
+          architecture and training</figcaption>
+          </figure>
+          <p><strong>Overview of CAST.</strong> A world model learns
+          latent dynamics, rewards, and a state-value critic trained
+          with alternating state-value targets that combine a replay
+          transition with an imagined policy transition. The planner
+          evaluates candidate trajectories using the terminal state
+          value, while the policy is optimized through expanded policy
+          gradients propagated across imagined rollouts.</p>
+          <p>The behavior policy
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+          (the planner) generally outperforms the learned policy
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>,
+          especially early in training. We argue the critic should learn
+          the value of
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+          rather than
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>,
+          so that policy improvement can draw on a stronger critic. But
+          bootstrapping directly from
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+          destabilizes training with overly large policy updates — a
+          common RL failure mode. CAST resolves this with a regularized
+          target that mixes one real transition under
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+          with one imagined transition under
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>:</p>
+          <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mi>t</mi></msub><mo>=</mo><msub><mi>r</mi><mi>t</mi></msub><mo>+</mo><mi>γ</mi><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">[</mo><msub><mi>R</mi><mi>ξ</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>z</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mover><mi>a</mi><mo accent="true">̃</mo></mover><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>γ</mi><mspace width="0.167em"></mspace><msub><mover><mi>V</mi><mo accent="true">‾</mo></mover><mi>ψ</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>z</mi><mo accent="true">̃</mo></mover><mrow><mi>t</mi><mo>+</mo><mn>2</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">]</mo><mo>,</mo><mspace width="2.0em"></mspace><msub><mover><mi>a</mi><mo accent="true">̃</mo></mover><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>∼</mo><msub><mi>π</mi><mi>θ</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>⋅</mi><mo>∣</mo><msub><mi>z</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">y_t = r_t + \gamma\Big[R_\xi(z_{t+1}, \tilde a_{t+1}) + \gamma\, \bar V_\psi(\tilde z_{t+2})\Big], \qquad
+          \tilde a_{t+1} \sim \pi_\theta(\cdot \mid z_{t+1})</annotation></semantics></math></p>
+          <p>Under fixed policies and exact dynamics, the resulting
+          operator
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi mathvariant="script">𝒯</mi><mtext mathvariant="normal">CAST</mtext></msub><mo>=</mo><msub><mi mathvariant="script">𝒯</mi><mi>β</mi></msub><msub><mi mathvariant="script">𝒯</mi><mi>π</mi></msub></mrow><annotation encoding="application/x-tex">\mathcal T_\text{CAST} = \mathcal T_\beta
+          \mathcal T_\pi</annotation></semantics></math> is a
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>γ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\gamma^2</annotation></semantics></math>-contraction
+          admitting a unique fixed point
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>V</mi><mtext mathvariant="normal">CAST</mtext></msub><annotation encoding="application/x-tex">V_\text{CAST}</annotation></semantics></math>
+          — neither the value of
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+          nor of
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>
+          alone, but the value induced by their alternating composition.
+          A state-value critic also removes the need to sample a
+          terminal action during planning, and gradients for policy
+          improvement are instead propagated through
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+          imagined transitions of the learned dynamics before
+          bootstrapping with
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>V</mi><mo accent="true">‾</mo></mover><mi>ψ</mi></msub><annotation encoding="application/x-tex">\bar V_\psi</annotation></semantics></math>.</p>
+          <h2 id="results">Results</h2>
+          <p>CAST is evaluated on 14 high-dimensional continuous-control
+          tasks from the DeepMind Control Suite and HumanoidBench
+          against five representative baselines — SAC, DreamerV3,
+          TD-MPC2, BMPC, and BOOM.</p>
+          <ul>
+          <li><strong>14</strong> DMControl + HumanoidBench tasks</li>
+          <li><strong>764 ± 63</strong> average return @ 1M steps (best
+          of all methods)</li>
+          <li><strong>1</strong> real-world Go2 handstand
+          deployment</li>
+          </ul>
+          <figure>
+          <img src="static/images/learning_curves.png"
+          alt="Episode return vs environment steps for CAST vs baselines on 14 tasks" />
+          <figcaption aria-hidden="true">Episode return vs environment
+          steps for CAST vs baselines on 14 tasks</figcaption>
+          </figure>
+          <p><strong>Sample efficiency.</strong> Episode return
+          vs. environment steps for CAST against BOOM and BMPC (with
+          SAC, DreamerV3, and TD-MPC2 also shown) on 7 DMControl and 7
+          HumanoidBench tasks. CAST matches or exceeds baseline
+          performance on the majority of environments and consistently
+          attains high returns earlier during training, most notably on
+          <code>H1hand-run</code>, <code>H1hand-pole</code>, and
+          <code>Dog-run</code>.</p>
+          <figure>
+          <img src="static/images/auc_profile.png"
+          alt="Performance profile of AUC-to-2M scores, pooled and per suite" />
+          <figcaption aria-hidden="true">Performance profile of
+          AUC-to-2M scores, pooled and per suite</figcaption>
+          </figure>
+          <p><strong>Performance profile of AUC-to-2M scores</strong>,
+          normalized per task by the best AUC any method reaches on that
+          task: pooled across all 14 tasks (left), and per suite
+          (DMControl, top right; HumanoidBench, bottom right). CAST
+          achieves the best AUC performance profile among all baselines,
+          confirming that its improved learning dynamics translate into
+          faster policy learning.</p>
+          <p><strong>Example task rollouts</strong> from the DMControl
+          (left, center) and HumanoidBench (right) suites.</p>
+          <video autoplay muted loop playsinline preload="metadata" width="320">
+          <source src="static/videos/humanoid_loop.mp4" type="video/mp4">
+          </video>
+          <video autoplay muted loop playsinline preload="metadata" width="320">
+          <source src="static/videos/dog_run_loop.mp4" type="video/mp4">
+          </video>
+          <video autoplay muted loop playsinline preload="metadata" width="320">
+          <source src="static/videos/hbench_loop.mp4" type="video/mp4">
+          </video>
+          <p>DMControl — Humanoid-run · DMControl — Dog-run ·
+          HumanoidBench — H1hand</p>
+          <h2 id="ablations">Ablations</h2>
+          <p>We isolate the contribution of the hybrid value target and
+          the expanded policy-gradient horizon on Dog-run and
+          Humanoid-run.</p>
+          <ol type="1">
+          <li><strong>Value target.</strong> The hybrid target beats
+          both purely off-policy
+          (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>V</mi><mi>β</mi></msub><annotation encoding="application/x-tex">V_\beta</annotation></semantics></math>)
+          and purely on-policy targets — pure off-policy bootstrapping
+          destabilizes training.</li>
+          <li><strong>Behavior-to-policy ratio.</strong> Anchoring to a
+          single real transition under
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+          (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>V</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_V{=}1</annotation></semantics></math>)
+          before the imagined
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>
+          step is a well-balanced choice;
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>V</mi></msub><mo>=</mo><mn>2</mn><mo>,</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">H_V{=}2,3</annotation></semantics></math>
+          do not consistently help.</li>
+          <li><strong>Gradient horizon.</strong>
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}1</annotation></semantics></math>
+          holds a small lead over longer expanded-gradient horizons
+          (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>2</mn><mo>,</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}2,3</annotation></semantics></math>),
+          with smaller confidence intervals on both tasks.</li>
+          </ol>
+          <figure>
+          <img src="static/images/ablation_vtarget_new.png"
+          alt="Value target ablation on Dog-run and Humanoid-run" />
+          <figcaption aria-hidden="true">Value target ablation on
+          Dog-run and Humanoid-run</figcaption>
+          </figure>
+          <p><strong>Value-target ablation.</strong> Our hybrid target
+          vs. purely on-policy and purely off-policy alternatives
+          (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}1</annotation></semantics></math>
+          throughout). The purely off-policy variant (bootstrapping
+          directly from
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>V</mi><mi>β</mi></msub><annotation encoding="application/x-tex">V_\beta</annotation></semantics></math>)
+          is consistently the worst of the three — it yields abrupt
+          policy updates that destabilize learning, confirming the need
+          for the alternating construction.</p>
+          <figure>
+          <img src="static/images/ablation_hv_new.png"
+          alt="Behavior-to-policy ratio ablation on Dog-run and Humanoid-run" />
+          <figcaption aria-hidden="true">Behavior-to-policy ratio
+          ablation on Dog-run and Humanoid-run</figcaption>
+          </figure>
+          <p><strong>Behavior-to-policy ratio ablation.</strong>
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>V</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_V{=}1</annotation></semantics></math>
+          (CAST)
+          vs. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>V</mi></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">H_V{=}2</annotation></semantics></math>
+          and
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>V</mi></msub><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">H_V{=}3</annotation></semantics></math>,
+          i.e. anchoring the value target to more real transitions under
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>β</mi><annotation encoding="application/x-tex">\beta</annotation></semantics></math>
+          before the single imagined step under
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>.
+          On Dog-run,
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>V</mi></msub><mo>=</mo><mn>2</mn><mo>,</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">H_V{=}2,3</annotation></semantics></math>
+          remain competitive with
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>V</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_V{=}1</annotation></semantics></math>;
+          on Humanoid-run both lag behind, indicating that anchoring to
+          a single real transition is a well-balanced choice.</p>
+          <figure>
+          <img src="static/images/ablation_pihorizon_new.png"
+          alt="Expanded gradient horizon ablation on Dog-run and Humanoid-run" />
+          <figcaption aria-hidden="true">Expanded gradient horizon
+          ablation on Dog-run and Humanoid-run</figcaption>
+          </figure>
+          <p><strong>Expanded-gradient-horizon ablation.</strong>
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}1</annotation></semantics></math>
+          (ours)
+          vs. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}2</annotation></semantics></math>
+          and
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}3</annotation></semantics></math>,
+          with the hybrid value target fixed. Longer horizons track each
+          other and
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}1</annotation></semantics></math>
+          closely, with
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>H</mi><mi>π</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">H_\pi{=}1</annotation></semantics></math>
+          holding a small lead and smaller confidence intervals on both
+          tasks.</p>
+          <h2 id="policies-learned-with-cast">Policies Learned with
+          CAST</h2>
+          <p>CAST policies rolled out in the MuJoCo physics simulator,
+          on both a quadruped (Unitree Go2, dynamic handstand) and a
+          humanoid (Unitree R1, locomotion), including robustness to
+          external pushes applied during the handstand.</p>
+          <video autoplay muted loop playsinline preload="metadata" width="320">
+          <source src="static/videos/r1_sim.mp4" type="video/mp4">
+          </video>
+          <video autoplay muted loop playsinline preload="metadata" width="320">
+          <source src="static/videos/go2_sim.mp4" type="video/mp4">
+          </video>
+          <p>R1 humanoid — locomotion (simulation) · Go2 — dynamic
+          handstand (simulation)</p>
+          <video autoplay muted loop playsinline preload="metadata" width="640">
+          <source src="static/videos/go2_sim_disturbance.mp4" type="video/mp4">
+          </video>
+          <p>Go2 — handstand under external disturbances
+          (simulation)</p>
+          <h2 id="real-world-deployment">Real-World Deployment</h2>
+          <p>To demonstrate practical applicability, we deploy a policy
+          trained entirely in simulation on a Unitree Go2 quadruped,
+          performing a dynamic handstand by lifting the rear legs and
+          balancing on the front legs — trained with domain
+          randomization and a curriculum, and deployed directly without
+          online planning.</p>
+          <video autoplay muted loop playsinline preload="metadata" width="320">
+          <source src="static/videos/go2_real_1.mp4" type="video/mp4">
+          </video>
+          <video autoplay muted loop playsinline preload="metadata" width="320">
+          <source src="static/videos/go2_real_2.mp4" type="video/mp4">
+          </video>
+          <p>Hardware deployment — run 1 · Hardware deployment — run
+          2</p>
+          <figure>
+          <img src="static/images/hw_snapshots.png"
+          alt="Snapshots of the learned CAST policy executing a dynamic handstand on the Unitree Go2" />
+          <figcaption aria-hidden="true">Snapshots of the learned CAST
+          policy executing a dynamic handstand on the Unitree
+          Go2</figcaption>
+          </figure>
+          <p><strong>Hardware deployment.</strong> Snapshots of the
+          learned policy
+          <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>θ</mi></msub><annotation encoding="application/x-tex">\pi_\theta</annotation></semantics></math>
+          executing a dynamic handstand on the Unitree Go2. The policy
+          transfers from simulation to hardware and executes stable
+          handstand motions in real time, without any online planning at
+          deployment.</p>
+        </div>
+      </div>
+
+          </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+  </body>
+</html>
